@@ -1,17 +1,16 @@
+import csv
 import socket
 import time
-import csv
-from datetime import datetime, date
+import time_helper as timeHelper
 
 class Outage:
   def __init__(self, serviceType):
     self.serviceType = serviceType
-    self.startTime = currentTime()
+    self.startTime = timeHelper.currentTime()
     self.endTime = None
 
   def finalize(self):
-    self.endTime = currentTime()
-
+    self.endTime = timeHelper.currentTime()
 
 class Connection:
   def __init__(self, host, port, timeout=3):
@@ -26,9 +25,6 @@ class Connection:
       return True
     except Exception as ex:
       return False
-
-def currentTime():
-  return datetime.now().replace(microsecond=0)
 
 def outageType(LANconnected, WANconnected):
     return 'ISP' if LANconnected else 'LAN'
@@ -55,23 +51,17 @@ def logEvent(outage):
 def buildLogData(outage):
   return [
            outage.serviceType,
-           readableTime(outage.startTime),
-           readableTime(outage.endTime),
-           str(timeDifference(outage.startTime.time(), outage.endTime.time()))
+           timeHelper.readableTime(outage.startTime),
+           timeHelper.readableTime(outage.endTime),
+           str(timeHelper.timeDifference(outage.startTime.time(), outage.endTime.time()))
          ]
-
-def readableTime(inputTime):
-  return inputTime.strftime("%F %r")
-
-
-def timeDifference(start, end):
-  seconds = (datetime.combine(date.min, end) - datetime.combine(date.min, start)).total_seconds()
-  return int(seconds)
 
 outage = None
 WAN = Connection('8.8.8.8', 53)
 LAN = Connection('192.168.1.1', 53)
+
 print 'Connection monitoring service started'
+
 while True:
   try:
     if LAN.isActive() and WAN.isActive():

@@ -1,30 +1,8 @@
+from connection import *
 import csv
-import socket
-import time
+from outage import *
+from time import sleep
 import time_helper as timeHelper
-
-class Outage:
-  def __init__(self, serviceType):
-    self.serviceType = serviceType
-    self.startTime = timeHelper.currentTime()
-    self.endTime = None
-
-  def finalize(self):
-    self.endTime = timeHelper.currentTime()
-
-class Connection:
-  def __init__(self, host, port, timeout=3):
-    self.host = host
-    self.port = port
-    self.timeout = timeout
-
-  def isActive(self):
-    try:
-      socket.setdefaulttimeout(self.timeout)
-      socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((self.host, self.port))
-      return True
-    except Exception as ex:
-      return False
 
 def outageType(LANconnected, WANconnected):
     return 'ISP' if LANconnected else 'LAN'
@@ -51,8 +29,8 @@ def logEvent(outage):
 def buildLogData(outage):
   return [
            outage.serviceType,
-           timeHelper.readableTime(outage.startTime),
-           timeHelper.readableTime(outage.endTime),
+           timeHelper.csvTime(outage.startTime),
+           timeHelper.csvTime(outage.endTime),
            str(timeHelper.timeDifference(outage.startTime.time(), outage.endTime.time()))
          ]
 
@@ -69,7 +47,7 @@ while True:
     else:
       failurePoint = outageType(LAN.isActive(), WAN.isActive())
       outage = outage or buildOutage(failurePoint)
-    time.sleep(1)
+    sleep(1)
   except KeyboardInterrupt:
     print 'Connection monitoring service stopped'
     exit(0)

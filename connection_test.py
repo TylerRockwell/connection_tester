@@ -17,11 +17,12 @@ def closeCurrentOutage(outage):
 
 def finalizeOutage(outage):
   outage.finalize()
-  logEvent(outage)
+  if outage.totalTime > 1:
+      logEvent(outage)
 
 def logEvent(outage):
-  csv = open('outage_log.csv', 'a')
   data = buildLogData(outage)
+  csv = open('outage_log.csv', 'a')
   csv.write(','.join(data))
   csv.write("\n")
   csv.close()
@@ -31,7 +32,7 @@ def buildLogData(outage):
            outage.serviceType,
            timeHelper.csvTime(outage.startTime),
            timeHelper.csvTime(outage.endTime),
-           str(timeHelper.timeDifference(outage.startTime.time(), outage.endTime.time()))
+           str(outage.totalTime)
          ]
 
 outage = None

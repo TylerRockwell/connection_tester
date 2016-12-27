@@ -8,3 +8,4 @@ class Outage:
 
   def finalize(self):
     self.endTime = timeHelper.currentTime()
+    self.totalTime = timeHelper.timeDifference(self.startTime.time(), self.endTime.time())
